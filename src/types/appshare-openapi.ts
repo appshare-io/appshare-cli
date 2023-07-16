@@ -3,11 +3,10 @@
  * Do not make direct changes to the file.
  */
 
-
 export interface paths {
   [path: `/api/rest/code-files/${string}`]: {
     /**
-     * UpdateCodeFile 
+     * UpdateCodeFile
      * @description Update code file***
      * The GraphQl query for this endpoint is:
      * ``` graphql
@@ -48,7 +47,7 @@ export interface paths {
           content: {
             "application/json": {
               /**
-               * codeFiles 
+               * codeFiles
                * @description columns and relationships of "appshare.code_files"
                */
               update_codeFiles_by_pk?: {
@@ -63,7 +62,7 @@ export interface paths {
   };
   [path: `/api/rest/user/${string}/apps`]: {
     /**
-     * UserApps 
+     * UserApps
      * @description Get user apps***
      * The GraphQl query for this endpoint is:
      * ``` graphql
@@ -104,14 +103,14 @@ export interface paths {
           content: {
             "application/json": {
               apps?: ({
-                  codebases?: ({
-                      codeFileId?: components["schemas"]["uuid!"];
-                      id?: components["schemas"]["uuid!"];
-                    })[];
+                codebases?: ({
+                  codeFileId?: components["schemas"]["uuid!"];
                   id?: components["schemas"]["uuid!"];
-                  /** String */
-                  name?: string;
                 })[];
+                id?: components["schemas"]["uuid!"];
+                /** String */
+                name?: string;
+              })[];
             };
           };
         };
@@ -120,7 +119,7 @@ export interface paths {
   };
   [path: `/api/rest/apps/codebases/${string}`]: {
     /**
-     * UpdateAppCodebase 
+     * UpdateAppCodebase
      * @description Update app codebase***
      * The GraphQl query for this endpoint is:
      * ``` graphql
@@ -161,7 +160,7 @@ export interface paths {
           content: {
             "application/json": {
               /**
-               * appCodebases 
+               * appCodebases
                * @description columns and relationships of "appshare.app_codebases"
                */
               update_appCodebases_by_pk?: {

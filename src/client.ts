@@ -1,6 +1,6 @@
 import { paths } from "./types/appshare-openapi.ts";
 import { createOpenapiClient } from "./deps.ts";
-import { env, auth } from "./utils.ts";
+import { auth, env } from "./utils.ts";
 
 if (!env.APPSHARE_BACKEND_URL) {
   throw new Error("APPSHARE_BACKEND_URL is not set in .env file");

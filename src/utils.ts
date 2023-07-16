@@ -1,8 +1,6 @@
 import { load } from "https://deno.land/std@0.194.0/dotenv/mod.ts";
 import { projectConfig } from "./config.ts";
-import {
-    HasuraAuthClient
-} from "npm:@nhost/hasura-auth-js";
+import { HasuraAuthClient } from "npm:@nhost/hasura-auth-js";
 
 interface Env extends Record<string, unknown> {
   APPSHARE_BACKEND_URL?: string;
@@ -17,15 +15,15 @@ export const env: Env = await load({
 export const AppshareStorageUrl = `${env.APPSHARE_BACKEND_URL}/v1/storage`;
 
 export const auth = new HasuraAuthClient({
-    url: `${env.APPSHARE_BACKEND_URL}/v1/auth`,
-    autoRefreshToken: true,
-    autoSignIn: true,
-    clientStorageType: "custom",
-    clientStorage: {
-        getItem: localStorage.getItem.bind(localStorage),
-        setItem: localStorage.setItem.bind(localStorage),
-        removeItem: localStorage.removeItem.bind(localStorage),
-    },
+  url: `${env.APPSHARE_BACKEND_URL}/v1/auth`,
+  autoRefreshToken: true,
+  autoSignIn: true,
+  clientStorageType: "custom",
+  clientStorage: {
+    getItem: localStorage.getItem.bind(localStorage),
+    setItem: localStorage.setItem.bind(localStorage),
+    removeItem: localStorage.removeItem.bind(localStorage),
+  },
 });
 
 export const getLoggedInUser = async () => {
@@ -60,10 +58,9 @@ export const getFileStat = async (path: string) => {
   }
 };
 
-
 export const exitWithMessage = (message: string, exitCode = 1) => {
-    const m = `\n\n${message}\n\n`
-    if (exitCode === 0) console.log(m)
-    else console.error(m)
-    Deno.exit(exitCode)
-}
+  const m = `\n\n${message}\n\n`;
+  if (exitCode === 0) console.log(m);
+  else console.error(m);
+  Deno.exit(exitCode);
+};

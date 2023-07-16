@@ -1,13 +1,13 @@
 import { client } from "./client.ts";
 import { projectConfig } from "./config.ts";
-import { Command, Confirm, EnumType, Secret, Select, bundle } from "./deps.ts";
+import { bundle, Command, Confirm, EnumType, Secret, Select } from "./deps.ts";
 import {
+  auth,
+  exitWithMessage,
   getFileStat,
   getInitializedProjectConfig,
   getLoggedInUser,
   isProjectInitialized,
-  auth,
-exitWithMessage,
 } from "./utils.ts";
 import { paths } from "./types/appshare-openapi.ts";
 import { fetchUpload } from "./libs/upload.ts";
@@ -39,8 +39,9 @@ await new Command()
       password,
     });
 
-    if (resp.error) 
+    if (resp.error) {
       throw new ValidationError(resp.error.message);
+    }
 
     exitWithMessage("Login successful!", 0);
   })
@@ -75,7 +76,9 @@ await new Command()
 
     const { apps } = resp.data;
 
-    if (!apps || apps.length === 0) return exitWithMessage("You don't have any apps, create one first");
+    if (!apps || apps.length === 0) {
+      return exitWithMessage("You don't have any apps, create one first");
+    }
 
     const app = await Select.prompt<typeof apps[0]>({
       message: "Select an app",
@@ -85,7 +88,9 @@ await new Command()
       })),
     });
 
-    if (!app.codebases || app.codebases.length === 0) return exitWithMessage("You don't have any codebases, create one first");
+    if (!app.codebases || app.codebases.length === 0) {
+      return exitWithMessage("You don't have any codebases, create one first");
+    }
 
     const codebase = await Select.prompt<typeof app.codebases[0]>({
       message: "Select a codebase",
@@ -124,7 +129,9 @@ await new Command()
       },
     }).catch((err) => {
       console.error(err);
-      exitWithMessage("Make sure you are using pure deno libs (no npm libs) and you have a valid entrypoint file");
+      exitWithMessage(
+        "Make sure you are using pure deno libs (no npm libs) and you have a valid entrypoint file",
+      );
     });
     if (!bundleResult) return exitWithMessage("Error bundling codebase");
 
@@ -139,18 +146,17 @@ await new Command()
       console.error(uploadResp?.error);
       return exitWithMessage("Error uploading bundle to server");
     }
-    
+
     // Updating app codebase
     console.log("Updating codebase code...");
-    const req:
-      paths["/api/rest/code-files/{id}"]["patch"]["parameters"] = {
-        path: {
-          id: projectConfig.codeFileId as string,
-        },
-        query: {
-          fileFid: uploadResp.fileMetadata.id,
-        },
-      };
+    const req: paths["/api/rest/code-files/{id}"]["patch"]["parameters"] = {
+      path: {
+        id: projectConfig.codeFileId as string,
+      },
+      query: {
+        fileFid: uploadResp.fileMetadata.id,
+      },
+    };
     const resp = await client.endpoint(`/api/rest/code-files/{id}`)
       .method("patch")(req);
     if (!resp.ok) return exitWithMessage("Error updating codebase code");
