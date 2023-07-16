@@ -1,9 +1,9 @@
-import { client } from "./client.ts";
+import { getClient } from "./client.ts";
 import { projectConfig } from "./config.ts";
 import { bundle, Command, Confirm, EnumType, Secret, Select } from "./deps.ts";
 import {
-  auth,
   exitWithMessage,
+  getAuthClient,
   getFileStat,
   getInitializedProjectConfig,
   getLoggedInUser,
@@ -34,7 +34,7 @@ await new Command()
       message: `Password for ${email}: `,
       hidden: true,
     });
-    const resp = await auth.signIn({
+    const resp = await getAuthClient().signIn({
       email,
       password,
     });
@@ -48,7 +48,7 @@ await new Command()
   // Command: logout
   .command("logout", "Logout from AppShare")
   .action(async (_) => {
-    await auth.signOut();
+    await getAuthClient().signOut();
     exitWithMessage("Logout successful!", 0);
   })
   // Command init
@@ -65,7 +65,7 @@ await new Command()
       if (!confirmed) return exitWithMessage("Aborting...", 0);
     }
 
-    const resp = await client.endpoint(`/api/rest/user/{id}/apps`).method(
+    const resp = await getClient().endpoint(`/api/rest/user/{id}/apps`).method(
       "get",
     )({
       path: {
@@ -157,7 +157,7 @@ await new Command()
         fileFid: uploadResp.fileMetadata.id,
       },
     };
-    const resp = await client.endpoint(`/api/rest/code-files/{id}`)
+    const resp = await getClient().endpoint(`/api/rest/code-files/{id}`)
       .method("patch")(req);
     if (!resp.ok) return exitWithMessage("Error updating codebase code");
 

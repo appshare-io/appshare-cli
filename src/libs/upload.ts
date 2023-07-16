@@ -1,4 +1,4 @@
-import { AppshareStorageUrl, auth } from "../utils.ts";
+import { AppshareStorageUrl, getAuthClient } from "../utils.ts";
 
 export const fetchUpload = async (
   file: File,
@@ -15,7 +15,7 @@ export const fetchUpload = async (
   } = {},
 ): Promise<StorageUploadFileResponse> => {
   const data = new FormData();
-  const accessToken = auth.getAccessToken();
+  const accessToken = getAuthClient().getAccessToken();
 
   data.append("file[]", file);
   data.append("metadata[]", JSON.stringify({ id, name: name ?? file.name }));
