@@ -59,3 +59,11 @@ export const getFileStat = async (path: string) => {
     return null;
   }
 };
+
+
+export const exitWithMessage = (message: string, exitCode = 1) => {
+    const m = `\n\n${message}\n\n`
+    if (exitCode === 0) console.log(m)
+    else console.error(m)
+    Deno.exit(exitCode)
+}

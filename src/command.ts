@@ -7,9 +7,11 @@ import {
   getLoggedInUser,
   isProjectInitialized,
   auth,
+exitWithMessage,
 } from "./utils.ts";
 import { paths } from "./types/appshare-openapi.ts";
 import { fetchUpload } from "./libs/upload.ts";
+import { ValidationError } from "https://deno.land/x/cliffy@v1.0.0-rc.2/command/mod.ts";
 
 const logLevelType = new EnumType(["debug", "info", "warn", "error"]);
 
@@ -37,18 +39,16 @@ await new Command()
       password,
     });
 
-    if (resp.error) {
-      console.error(resp.error);
-      return;
-    }
+    if (resp.error) 
+      throw new ValidationError(resp.error.message);
 
-    console.log("Login successful!");
+    exitWithMessage("Login successful!", 0);
   })
   // Command: logout
   .command("logout", "Logout from AppShare")
   .action(async (_) => {
     await auth.signOut();
-    console.log("Logout successful!");
+    exitWithMessage("Logout successful!", 0);
   })
   // Command init
   .command("init", "Initialize a AppShare project")
@@ -61,10 +61,7 @@ await new Command()
           "You already have a project initialized, do you want to overwrite it?",
         default: false,
       });
-      if (!confirmed) {
-        console.log("Aborting...");
-        return;
-      }
+      if (!confirmed) return exitWithMessage("Aborting...", 0);
     }
 
     const resp = await client.endpoint(`/api/rest/user/{id}/apps`).method(
@@ -74,17 +71,11 @@ await new Command()
         id: user.id,
       },
     });
-    if (!resp.ok) {
-      console.error("Error fetching apps, try re-login");
-      return;
-    }
+    if (!resp.ok) exitWithMessage("Error fetching apps, try re-login");
 
     const { apps } = resp.data;
 
-    if (!apps || apps.length === 0) {
-      console.error("You don't have any apps, create one first");
-      return;
-    }
+    if (!apps || apps.length === 0) return exitWithMessage("You don't have any apps, create one first");
 
     const app = await Select.prompt<typeof apps[0]>({
       message: "Select an app",
@@ -94,12 +85,7 @@ await new Command()
       })),
     });
 
-    if (!app.codebases || app.codebases.length === 0) {
-      console.error(
-        "You don't have any codebases in this app, create one first",
-      );
-      return;
-    }
+    if (!app.codebases || app.codebases.length === 0) return exitWithMessage("You don't have any codebases, create one first");
 
     const codebase = await Select.prompt<typeof app.codebases[0]>({
       message: "Select a codebase",
@@ -113,7 +99,7 @@ await new Command()
     projectConfig.set("codebaseId", codebase.id);
     projectConfig.set("codeFileId", codebase.codeFileId);
 
-    console.log("Project initialized!");
+    exitWithMessage("Project initialized!", 0);
   })
   // Command Deploy
   .command("deploy", "Deploy your codebase")
@@ -129,10 +115,7 @@ await new Command()
 
     // Check if file exsists
     const fileStat = await getFileStat(entrypoint);
-    if (!fileStat) {
-      console.error("Entrypoint file does not exsist");
-      return;
-    }
+    if (!fileStat) return exitWithMessage("Entrypoint file not found");
 
     console.log("Bundling codebase...");
     const bundleResult = await bundle(entrypoint, {
@@ -141,12 +124,9 @@ await new Command()
       },
     }).catch((err) => {
       console.error(err);
-      console.error(
-        "\n\nMake sure you are using pure deno libs (no npm libs) and you have a valid entrypoint file",
-      );
-      return;
+      exitWithMessage("Make sure you are using pure deno libs (no npm libs) and you have a valid entrypoint file");
     });
-    if (!bundleResult) return;
+    if (!bundleResult) return exitWithMessage("Error bundling codebase");
 
     // Uploading bundle to server
     const file = new File([bundleResult.code], "bundle.js", {
@@ -156,9 +136,8 @@ await new Command()
     const uploadResp = await fetchUpload(file);
 
     if (!uploadResp || uploadResp.error) {
-      console.error("Error uploading bundle to server");
       console.error(uploadResp?.error);
-      return;
+      return exitWithMessage("Error uploading bundle to server");
     }
     
     // Updating app codebase
@@ -174,11 +153,8 @@ await new Command()
       };
     const resp = await client.endpoint(`/api/rest/code-files/{id}`)
       .method("patch")(req);
-    if (!resp.ok) {
-      console.error("Error updating codebase");
-      return;
-    }
+    if (!resp.ok) return exitWithMessage("Error updating codebase code");
 
-    console.log("Codebase deployed!");
+    exitWithMessage("Codebase deployed!", 0);
   })
   .parse(Deno.args);
