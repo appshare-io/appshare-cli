@@ -1,0 +1,11 @@
+#!/bin/bash
+
+FILE_TO_RUN=src/command.ts
+APPSHARE_HOST=$(echo $(grep APPSHARE_HOST .env | cut -d '=' -f2) | sed 's/"//g')
+APPSHARE_CLI_REPO=$(echo $(grep APPSHARE_CLI_REPO .env | cut -d '=' -f2) | sed 's/"//g')
+
+args=("$@")
+permissions=(--allow-read --allow-env --allow-net=$APPSHARE_HOST,deno.land --allow-write=.)
+options=(--location=$APPSHARE_CLI_REPO)
+
+deno run ${permissions[@]} ${options[@]} $FILE_TO_RUN ${args[@]}
