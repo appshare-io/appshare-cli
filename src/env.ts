@@ -14,7 +14,7 @@ const { state: envState } = await Deno.permissions.query({
 
 export const env: Env = envState === "granted"
   ? {
-    APPSHARE_BACKEND_URL: Deno.env.get("APPSHARE_BACKEND_URL"),
-    APPSHARE_CLIENT_ROLE: Deno.env.get("APPSHARE_CLIENT_ROLE"),
+    APPSHARE_BACKEND_URL: Deno.env.get("APPSHARE_BACKEND_URL") || defaultEnv.APPSHARE_BACKEND_URL,
+    APPSHARE_CLIENT_ROLE: Deno.env.get("APPSHARE_CLIENT_ROLE") || defaultEnv.APPSHARE_CLIENT_ROLE,
   }
   : defaultEnv;
