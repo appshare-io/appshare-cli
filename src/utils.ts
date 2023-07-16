@@ -1,11 +1,8 @@
-import { load } from "https://deno.land/std/dotenv/mod.ts";
+import { load } from "https://deno.land/std@0.194.0/dotenv/mod.ts";
 import { projectConfig } from "./config.ts";
 import {
-  NhostClient,
-  type StorageUploadFileParams,
-  type StorageUploadFileResponse,
-} from "npm:@nhost/nhost-js";
-import { fetchUpload } from "./libs/upload.ts";
+    HasuraAuthClient
+} from "npm:@nhost/hasura-auth-js";
 
 interface Env extends Record<string, unknown> {
   APPSHARE_BACKEND_URL?: string;
@@ -17,24 +14,24 @@ export const env: Env = await load({
   envPath: "./.env",
   defaultsPath: "./.env.defaults",
 });
+export const AppshareStorageUrl = `${env.APPSHARE_BACKEND_URL}/v1/storage`;
 
-export const nhost = new NhostClient({
-    authUrl: `${env.APPSHARE_BACKEND_URL}/v1/auth`,
-  storageUrl: `${env.APPSHARE_BACKEND_URL}/v1/storage`,
-  graphqlUrl: `${env.APPSHARE_BACKEND_URL}/v1/graphql`,
-  functionsUrl: `${env.APPSHARE_BACKEND_URL}/v1/functions`,
-  clientStorageType: "custom",
-  clientStorage: {
-    getItem: localStorage.getItem.bind(localStorage),
-    setItem: localStorage.setItem.bind(localStorage),
-    removeItem: localStorage.removeItem.bind(localStorage),
-  },
+export const auth = new HasuraAuthClient({
+    url: `${env.APPSHARE_BACKEND_URL}/v1/auth`,
+    autoRefreshToken: true,
+    autoSignIn: true,
+    clientStorageType: "custom",
+    clientStorage: {
+        getItem: localStorage.getItem.bind(localStorage),
+        setItem: localStorage.setItem.bind(localStorage),
+        removeItem: localStorage.removeItem.bind(localStorage),
+    },
 });
 
 export const getLoggedInUser = async () => {
-  await nhost.auth.refreshSession();
-  const user = nhost.auth.getUser();
-  if (!user || !nhost.auth.isAuthenticated()) {
+  await auth.refreshSession();
+  const user = auth.getUser();
+  if (!user || !auth.isAuthenticated()) {
     console.error(
       "You are not logged in!, please login first (appshare login)",
     );

@@ -1,18 +1,13 @@
 import { client } from "./client.ts";
 import { projectConfig } from "./config.ts";
-import { Command, Confirm, EnumType, Secret, Select } from "./deps.ts";
-import { bundle } from "https://deno.land/x/emit@0.24.0/mod.ts";
+import { Command, Confirm, EnumType, Secret, Select, bundle } from "./deps.ts";
 import {
   getFileStat,
   getInitializedProjectConfig,
   getLoggedInUser,
   isProjectInitialized,
-  nhost,
+  auth,
 } from "./utils.ts";
-import {
-  GithubProvider,
-  UpgradeCommand,
-} from "https://deno.land/x/cliffy@v1.0.0-rc.2/command/upgrade/mod.ts";
 import { paths } from "./types/appshare-openapi.ts";
 import { fetchUpload } from "./libs/upload.ts";
 
@@ -29,16 +24,6 @@ await new Command()
   .globalOption("-l, --log-level <level:log-level>", "Set log level.", {
     default: "info" as const,
   })
-  // .command(
-  //   "upgrade",
-  //   new UpgradeCommand({
-  //     main: "cliffy.ts",
-  //     args: ["--allow-net"],
-  //     provider: new GithubProvider({
-  //       repository: env.APPSHARE_CLI_REPO ? env.APPSHARE_CLI_REPO : "",
-  //     }),
-  //   }),
-  // )
   // Command: login
   .command("login", "Login to AppShare")
   .arguments("<email:string>")
@@ -47,7 +32,7 @@ await new Command()
       message: `Password for ${email}: `,
       hidden: true,
     });
-    const resp = await nhost.auth.signIn({
+    const resp = await auth.signIn({
       email,
       password,
     });
@@ -62,7 +47,7 @@ await new Command()
   // Command: logout
   .command("logout", "Logout from AppShare")
   .action(async (_) => {
-    await nhost.auth.signOut();
+    await auth.signOut();
     console.log("Logout successful!");
   })
   // Command init

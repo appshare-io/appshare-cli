@@ -1,6 +1,6 @@
 import { paths } from "./types/appshare-openapi.ts";
 import { createOpenapiClient } from "./deps.ts";
-import { env, nhost } from "./utils.ts";
+import { env, auth } from "./utils.ts";
 
 if (!env.APPSHARE_BACKEND_URL) {
   throw new Error("APPSHARE_BACKEND_URL is not set in .env file");
@@ -18,7 +18,7 @@ export const client = createOpenapiClient<paths>({
       }
       if (!headers.get("Accept")) headers.set("Accept", "application/json");
       if (!headers.get("Authorization")) {
-        const accessToken = nhost.auth.getAccessToken();
+        const accessToken = auth.getAccessToken();
         if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
       }
       if (!headers.get("X-Hasura-Role")) {

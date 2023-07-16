@@ -1,4 +1,4 @@
-import { nhost } from "../utils.ts";
+import { AppshareStorageUrl, auth } from "../utils.ts";
 
 
 export const fetchUpload = async (
@@ -7,18 +7,16 @@ export const fetchUpload = async (
     id,
     name,
     bucketId,
-    onUploadProgress,
     headers: initialHeaders = {}
   }: {
     bucketId?: string
     id?: string
     name?: string
-    onUploadProgress?: (event: { total: number; loaded: number }) => void
     headers?: Record<string, string>
   } = {}
 ): Promise<StorageUploadFileResponse> => {
     const data = new FormData();
-    const accessToken = nhost.auth.getAccessToken()
+    const accessToken = auth.getAccessToken()
 
     data.append("file[]", file);
     data.append("metadata[]", JSON.stringify({ id, name: name ?? file.name }));
@@ -33,7 +31,7 @@ export const fetchUpload = async (
         headers['Authorization'] = `Bearer ${accessToken}`
     }
 
-    const url = `${nhost.storage.url}/files`
+    const url = `${AppshareStorageUrl}/files`
 
     // * Non-browser environment: XMLHttpRequest is not available
     try {
